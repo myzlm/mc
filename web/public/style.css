@@ -1,0 +1,102 @@
+:root {
+  --bg: #0d1117;
+  --panel: #161b27;
+  --panel-2: #1c2333;
+  --line: #2a3348;
+  --text: #e6edf3;
+  --muted: #8b98ad;
+  --green: #3fb950;
+  --red: #f85149;
+  --cyan: #58c4dc;
+  --gold: #e3b341;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+.bg-grid {
+  position: fixed; inset: 0; z-index: -1; opacity: .35;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 6vw; border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.cube {
+  width: 26px; height: 26px; background: linear-gradient(135deg, #7ee787, #3fb950);
+  border-radius: 5px; box-shadow: 0 0 18px rgba(63,185,80,.55);
+  image-rendering: pixelated;
+}
+.logo h1 { font-size: 1.15rem; letter-spacing: .5px; }
+.logo em { font-style: normal; color: var(--cyan); }
+nav a {
+  color: var(--muted); text-decoration: none; margin-left: 26px; font-size: .92rem;
+  transition: color .2s;
+}
+nav a:hover { color: var(--text); }
+
+main { max-width: 980px; margin: 0 auto; padding: 34px 5vw 60px; }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 26px 28px; margin-bottom: 22px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.25);
+}
+.hero { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.hero h2 { margin: 14px 0 6px; font-size: 1.7rem; }
+.sub { color: var(--muted); font-size: .85rem; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 999px; font-size: .88rem;
+  background: var(--panel-2); border: 1px solid var(--line);
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s infinite; }
+.status-pill.online .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+.status-pill.offline .dot { background: var(--red); }
+@keyframes pulse { 50% { opacity: .35; } }
+.big-count { text-align: right; }
+.big-count span { font-size: 3rem; font-weight: 700; color: var(--green); }
+.big-count small { color: var(--muted); font-size: 1rem; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.grid .card { margin-bottom: 22px; }
+.card h3 { font-size: 1rem; margin-bottom: 14px; color: var(--cyan); }
+.addr-row { display: flex; gap: 10px; }
+.addr-row code {
+  flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px 12px; font-size: .95rem; overflow-x: auto; white-space: nowrap;
+}
+button {
+  background: linear-gradient(135deg, #2ea043, #238636); color: #fff; border: none;
+  border-radius: 8px; padding: 10px 16px; cursor: pointer; font-weight: 600; transition: filter .2s;
+}
+button:hover { filter: brightness(1.15); }
+.stat-num { font-size: 2.2rem; font-weight: 700; }
+.stat-num.sm { font-size: 1.5rem; }
+.hint { color: var(--muted); font-size: .82rem; margin-top: 8px; }
+
+.players { display: flex; flex-wrap: wrap; gap: 12px; }
+.player {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 8px 16px 8px 8px;
+}
+.player img { width: 32px; height: 32px; image-rendering: pixelated; border-radius: 6px; }
+.empty { color: var(--muted); }
+
+.steps { line-height: 2.1; color: var(--text); padding-left: 20px; }
+.steps code { background: var(--bg); border: 1px solid var(--line); padding: 2px 8px; border-radius: 6px; }
+footer {
+  text-align: center; color: var(--muted); font-size: .82rem;
+  padding: 26px 0 34px; border-top: 1px solid var(--line);
+}

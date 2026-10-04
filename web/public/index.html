@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyZLM 的 MC 服务器</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<header>
+  <div class="logo">
+    <span class="cube"></span>
+    <h1>MyZLM <em>MC SERVER</em></h1>
+  </div>
+  <nav>
+    <a href="#status">状态</a>
+    <a href="#players">玩家</a>
+    <a href="#join">加入</a>
+  </nav>
+</header>
+
+<main>
+  <!-- 状态总览 -->
+  <section id="status" class="hero card">
+    <div class="hero-left">
+      <div class="status-pill" id="status-pill"><span class="dot"></span><span id="status-text">正在探测服务器…</span></div>
+      <h2 id="motd">—</h2>
+      <p class="sub" id="queried-at"></p>
+    </div>
+    <div class="hero-right">
+      <div class="big-count"><span id="players-online">–</span><small>/<span id="players-max">8</span> 在线</small></div>
+    </div>
+  </section>
+
+  <!-- 信息卡组 -->
+  <section class="grid">
+    <div class="card">
+      <h3>🧭 服务器地址</h3>
+      <div class="addr-row">
+        <code id="server-addr">…</code>
+        <button id="copy-btn" type="button">复制</button>
+      </div>
+      <p class="hint">Java 版 26.3 · 直连即可加入</p>
+    </div>
+    <div class="card">
+      <h3>⚡ 实时延迟</h3>
+      <div class="stat-num" id="latency">–</div>
+      <p class="hint" id="latency-hint">由网页向服务器发起状态查询测得</p>
+    </div>
+    <div class="card">
+      <h3>🎮 服务端版本</h3>
+      <div class="stat-num sm" id="version">–</div>
+      <p class="hint">Paper 高性能服务端</p>
+    </div>
+  </section>
+
+  <!-- 在线玩家 -->
+  <section id="players" class="card">
+    <h3>👥 在线玩家</h3>
+    <div id="player-list" class="players"><p class="hint">暂无数据</p></div>
+  </section>
+
+  <!-- 加入方式 -->
+  <section id="join" class="card">
+    <h3>📖 如何加入</h3>
+    <ol class="steps">
+      <li>启动 Minecraft <b>Java 版 26.3</b>（版本不符将无法进入）</li>
+      <li>多人游戏 → 添加服务器 → 地址填 <code id="addr-inline">…</code></li>
+      <li>你的游戏 ID 需要提前加白名单，联系服主 <b>myzlm</b> 添加</li>
+      <li>保存并加入，玩得开心！</li>
+    </ol>
+  </section>
+</main>
+
+<footer>
+  <p>MyZLM MC Server · Paper 26.3 · 8 人小服 · <span id="foot-status">…</span></p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
