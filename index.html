@@ -200,7 +200,7 @@ function renderOffline(d) {
 
 async function refresh() {
   try {
-    const res = await fetch('/api/mc/status');
+    const res = await fetch('https://myzlm.serveousercontent.com/api/mc/status');
     const d = await res.json();
     if (d.online) renderOnline(d); else renderOffline(d);
   } catch (e) {
