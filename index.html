@@ -89,7 +89,7 @@ footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 26
     <span class="cube"></span>
     <h1>MyZLM <em>MC SERVER</em></h1>
   </div>
-  <!-- <a class="back" href="/">← 返回墨韵首页</a> -->
+  <a class="back" href="/">← 返回墨韵首页</a>
 </header>
 
 <main>
@@ -108,7 +108,7 @@ footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 26
     <div class="card">
       <h3>🧭 服务器地址</h3>
       <div class="addr-row">
-        <code id="server-addr">…</code>
+        <code id="server-addr">stamina-stoves.tun.ply.gg:4671</code>
         <button id="copy-btn" type="button">复制</button>
       </div>
       <p class="hint">Java 版 26.3 · 直连即可加入</p>
@@ -134,7 +134,7 @@ footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 26
     <h3>📖 如何加入</h3>
     <ol class="steps">
       <li>启动 Minecraft <b>Java 版 26.3</b>（版本不符无法进入）</li>
-      <li>多人游戏 → 添加服务器 → 地址填 <code id="addr-inline">…</code></li>
+      <li>多人游戏 → 添加服务器 → 地址填 <code id="addr-inline">stamina-stoves.tun.ply.gg:4671</code></li>
       <li>游戏 ID 需要提前加白名单，联系服主 <b>myzlm</b></li>
       <li>保存并加入，玩得开心！</li>
     </ol>
@@ -150,6 +150,18 @@ footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 26
 const $ = (id) => document.getElementById(id);
 const pill = $('status-pill'), statusText = $('status-text');
 
+// playit 公网地址（兜底显示，后端可通过环境变量 MC_PUBLIC_ADDRESS 覆盖）
+const FALLBACK_ADDRESS = 'stamina-stoves.tun.ply.gg:4671';
+// API 自适应：本地走相对路径；GitHub Pages 上相对路径不通时自动切到 serveo 隧道后端
+const API_CANDIDATES = ['/api/mc/status', 'https://myzlm.serveousercontent.com/api/mc/status'];
+let apiIndex = 0;
+
+function showAddress(addr) {
+  const a = addr || FALLBACK_ADDRESS;
+  $('server-addr').textContent = a;
+  $('addr-inline').textContent = a;
+}
+
 function renderOnline(d) {
   pill.className = 'status-pill online';
   statusText.textContent = '服务器在线';
@@ -160,7 +172,7 @@ function renderOnline(d) {
   $('version').textContent = d.version;
   $('latency').textContent = d.latency + ' ms';
   $('foot-status').textContent = '当前状态：在线';
-  if (d.address) { $('server-addr').textContent = d.address; $('addr-inline').textContent = d.address; }
+  showAddress(d.address);
   const list = $('player-list');
   list.innerHTML = '';
   if (d.players.sample && d.players.sample.length) {
@@ -190,6 +202,7 @@ function renderOffline(d) {
   $('players-online').textContent = '0';
   $('latency').textContent = '–';
   $('foot-status').textContent = '当前状态：离线';
+  showAddress(null);
   const list = $('player-list');
   list.innerHTML = '';
   const p = document.createElement('p');
@@ -199,13 +212,18 @@ function renderOffline(d) {
 }
 
 async function refresh() {
-  try {
-    const res = await fetch('https://myzlm.serveousercontent.com/api/mc/status');
-    const d = await res.json();
-    if (d.online) renderOnline(d); else renderOffline(d);
-  } catch (e) {
-    renderOffline({ error: String(e) });
+  for (let i = 0; i < API_CANDIDATES.length; i++) {
+    const idx = (apiIndex + i) % API_CANDIDATES.length;
+    try {
+      const res = await fetch(API_CANDIDATES[idx], { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const d = await res.json();
+      apiIndex = idx; // 记住可用的 API 入口
+      if (d.online) renderOnline(d); else renderOffline(d);
+      return;
+    } catch (e) { /* 尝试下一个 API 入口 */ }
   }
+  renderOffline({ error: 'backend unreachable' });
 }
 
 $('copy-btn').addEventListener('click', async () => {
