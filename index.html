@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MC 服务器状态 · 墨韵</title>
+<style>
+:root {
+  --bg: #0d1117; --panel: #161b27; --panel-2: #1c2333; --line: #2a3348;
+  --text: #e6edf3; --muted: #8b98ad; --green: #3fb950; --red: #f85149;
+  --cyan: #58c4dc; --gold: #e3b341;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  min-height: 100vh; overflow-x: hidden;
+}
+.bg-grid {
+  position: fixed; inset: 0; z-index: -1; opacity: .35;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 48px 48px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 18px 6vw; border-bottom: 1px solid var(--line);
+}
+.logo { display: flex; align-items: center; gap: 12px; }
+.cube { width: 26px; height: 26px; background: linear-gradient(135deg, #7ee787, #3fb950);
+  border-radius: 5px; box-shadow: 0 0 18px rgba(63,185,80,.55); }
+.logo h1 { font-size: 1.15rem; letter-spacing: .5px; }
+.logo em { font-style: normal; color: var(--cyan); }
+header .back { color: var(--muted); text-decoration: none; font-size: .9rem; }
+header .back:hover { color: var(--text); }
+main { max-width: 980px; margin: 0 auto; padding: 34px 5vw 60px; }
+.card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  padding: 26px 28px; margin-bottom: 22px; box-shadow: 0 8px 30px rgba(0,0,0,.25);
+}
+.hero { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+.hero h2 { margin: 14px 0 6px; font-size: 1.7rem; }
+.sub { color: var(--muted); font-size: .85rem; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px;
+  border-radius: 999px; font-size: .88rem; background: var(--panel-2); border: 1px solid var(--line);
+}
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--gold); animation: pulse 1.2s infinite; }
+.status-pill.online .dot { background: var(--green); box-shadow: 0 0 10px var(--green); }
+.status-pill.offline .dot { background: var(--red); }
+@keyframes pulse { 50% { opacity: .35; } }
+.big-count { text-align: right; }
+.big-count span { font-size: 3rem; font-weight: 700; color: var(--green); }
+.big-count small { color: var(--muted); font-size: 1rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.card h3 { font-size: 1rem; margin-bottom: 14px; color: var(--cyan); }
+.addr-row { display: flex; gap: 10px; }
+.addr-row code {
+  flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  padding: 10px 12px; font-size: .95rem; overflow-x: auto; white-space: nowrap;
+}
+button {
+  background: linear-gradient(135deg, #2ea043, #238636); color: #fff; border: none;
+  border-radius: 8px; padding: 10px 16px; cursor: pointer; font-weight: 600; transition: filter .2s;
+}
+button:hover { filter: brightness(1.15); }
+.stat-num { font-size: 2.2rem; font-weight: 700; }
+.stat-num.sm { font-size: 1.5rem; }
+.hint { color: var(--muted); font-size: .82rem; margin-top: 8px; }
+.players { display: flex; flex-wrap: wrap; gap: 12px; }
+.player {
+  display: flex; align-items: center; gap: 10px; background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 10px; padding: 8px 16px 8px 8px;
+}
+.player img { width: 32px; height: 32px; image-rendering: pixelated; border-radius: 6px; }
+.empty { color: var(--muted); }
+.steps { line-height: 2.1; padding-left: 20px; }
+.steps code { background: var(--bg); border: 1px solid var(--line); padding: 2px 8px; border-radius: 6px; }
+footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 26px 0 34px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<header>
+  <div class="logo">
+    <span class="cube"></span>
+    <h1>MyZLM <em>MC SERVER</em></h1>
+  </div>
+  <a class="back" href="/">← 返回墨韵首页</a>
+</header>
+
+<main>
+  <section class="hero card">
+    <div class="hero-left">
+      <div class="status-pill" id="status-pill"><span class="dot"></span><span id="status-text">正在探测服务器…</span></div>
+      <h2 id="motd">—</h2>
+      <p class="sub" id="queried-at"></p>
+    </div>
+    <div class="hero-right">
+      <div class="big-count"><span id="players-online">–</span><small>/<span id="players-max">8</span> 在线</small></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h3>🧭 服务器地址</h3>
+      <div class="addr-row">
+        <code id="server-addr">…</code>
+        <button id="copy-btn" type="button">复制</button>
+      </div>
+      <p class="hint">Java 版 26.3 · 直连即可加入</p>
+    </div>
+    <div class="card">
+      <h3>⚡ 实时延迟</h3>
+      <div class="stat-num" id="latency">–</div>
+      <p class="hint" id="latency-hint">由服务器后端发起状态查询测得</p>
+    </div>
+    <div class="card">
+      <h3>🎮 服务端版本</h3>
+      <div class="stat-num sm" id="version">–</div>
+      <p class="hint">Paper 高性能服务端</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>👥 在线玩家</h3>
+    <div id="player-list" class="players"><p class="hint">暂无数据</p></div>
+  </section>
+
+  <section class="card">
+    <h3>📖 如何加入</h3>
+    <ol class="steps">
+      <li>启动 Minecraft <b>Java 版 26.3</b>（版本不符无法进入）</li>
+      <li>多人游戏 → 添加服务器 → 地址填 <code id="addr-inline">…</code></li>
+      <li>游戏 ID 需要提前加白名单，联系服主 <b>myzlm</b></li>
+      <li>保存并加入，玩得开心！</li>
+    </ol>
+  </section>
+</main>
+
+<footer>
+  <p>MyZLM MC Server · Paper 26.3 · 8 人小服 · <span id="foot-status">…</span></p>
+</footer>
+
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const pill = $('status-pill'), statusText = $('status-text');
+
+function renderOnline(d) {
+  pill.className = 'status-pill online';
+  statusText.textContent = '服务器在线';
+  $('motd').textContent = d.motd || '欢迎来到 MyZLM 的 MC 服务器';
+  $('queried-at').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+  $('players-online').textContent = d.players.online;
+  $('players-max').textContent = d.players.max;
+  $('version').textContent = d.version;
+  $('latency').textContent = d.latency + ' ms';
+  $('foot-status').textContent = '当前状态：在线';
+  if (d.address) { $('server-addr').textContent = d.address; $('addr-inline').textContent = d.address; }
+  const list = $('player-list');
+  list.innerHTML = '';
+  if (d.players.sample && d.players.sample.length) {
+    for (const p of d.players.sample) {
+      const div = document.createElement('div');
+      div.className = 'player';
+      const img = document.createElement('img');
+      img.src = 'https://minotar.net/avatar/' + encodeURIComponent(p.name) + '/32';
+      const span = document.createElement('span');
+      span.textContent = p.name;
+      div.append(img, span);
+      list.appendChild(div);
+    }
+  } else {
+    const p = document.createElement('p');
+    p.className = 'empty';
+    p.textContent = d.players.online > 0 ? '有玩家在线（服务器未公开玩家列表）' : '现在没有人在线，快来成为第一个！';
+    list.appendChild(p);
+  }
+}
+
+function renderOffline(d) {
+  pill.className = 'status-pill offline';
+  statusText.textContent = '服务器离线';
+  $('motd').textContent = '服务器暂时不在线';
+  $('queried-at').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+  $('players-online').textContent = '0';
+  $('latency').textContent = '–';
+  $('foot-status').textContent = '当前状态：离线';
+  const list = $('player-list');
+  list.innerHTML = '';
+  const p = document.createElement('p');
+  p.className = 'empty';
+  p.textContent = '服务器离线时无法获取玩家数据';
+  list.appendChild(p);
+}
+
+async function refresh() {
+  try {
+    const res = await fetch('/api/mc/status');
+    const d = await res.json();
+    if (d.online) renderOnline(d); else renderOffline(d);
+  } catch (e) {
+    renderOffline({ error: String(e) });
+  }
+}
+
+$('copy-btn').addEventListener('click', async () => {
+  const addr = $('server-addr').textContent;
+  try {
+    await navigator.clipboard.writeText(addr);
+  } catch (_) {
+    const ta = document.createElement('textarea');
+    ta.value = addr;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  }
+  $('copy-btn').textContent = '已复制 ✓';
+  setTimeout(() => { $('copy-btn').textContent = '复制'; }, 1500);
+});
+
+refresh();
+setInterval(refresh, 15000);
+</script>
+</body>
+</html>
