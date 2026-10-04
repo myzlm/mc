@@ -17,6 +17,6 @@
 | `WEB_PORT` | 网站端口 | 3000 |
 | `MC_HOST` | MC 服务器地址 | 127.0.0.1 |
 | `MC_PORT` | MC 服务器端口 | 25565 |
-| `PUBLIC_IP` | 页面展示的对外 IP/域名 | 留空显示内网地址 |
+| `PUBLIC_IP` | 页面展示的对外 IP/域名 | 已默认设为 playit 公网地址 `stamina-stoves.tun.ply.gg:4671` |
 
 局域网好友访问：`http://你的内网IP:3000`（首次启动 Windows 防火墙需放行 node/3000 端口）。
